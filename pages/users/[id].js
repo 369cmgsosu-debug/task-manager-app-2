@@ -1,87 +1,89 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { TaskContext } from '../_app';
 
 const statusClassMap = {
   '未着手': 'not-started',
   '進行中': 'in-progress',
-  '完了': 'completed',
-  '遅延': 'overdue'
+  '完了': 'completed'
 };
 
 export default function UserPage() {
   const router = useRouter();
   const { id } = router.query;
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { tasks, updateTaskStatus, deleteTask, isLoaded } = useContext(TaskContext);
+  const [today, setToday] = useState("");
 
   useEffect(() => {
-    if (!id) return;
-    fetch('/api/data')
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data);
-        setLoading(false);
-      });
-  }, [id]);
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    setToday(todayStr);
+  }, []);
 
-  if (loading) return <div>読み込み中...</div>;
+  if (!isLoaded || !id) return <div>読み込み中...</div>;
 
-  const user = data.users.find((u) => u.id === parseInt(id));
-  if (!user) return <div>ユーザーが見つかりません</div>;
-
-  const userTasks = data.tasks.filter((t) => t.assignee === user.id);
-  const projectIds = [...new Set(userTasks.map((t) => t.project_id))];
-  
-  // Get local date string YYYY-MM-DD
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const userName = decodeURIComponent(id);
+  const userTasks = tasks.filter(t => t.assignee === userName);
+  const projectCount = new Set(userTasks.map(t => t.projectName)).size;
 
   return (
     <div className="container">
-      <Link href="/" className="btn no-print" style={{ marginBottom: '20px', backgroundColor: '#888' }}>
-        戻る
+      <Link href="/" className="btn btn-secondary no-print" style={{ marginBottom: '20px' }}>
+        ← ダッシュボードに戻る
       </Link>
-      <h1>{user.name} のタスク一覧</h1>
-      <p>抱えている案件数: {projectIds.length}</p>
-
-      <div style={{ marginBottom: '20px' }}>
-        <Link href={`/print/${user.id}`} className="btn print-btn">
-          印刷用ページを表示
+      
+      <h1>{userName} のタスク一覧</h1>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <p>抱えている案件数: <strong>{projectCount}</strong></p>
+        <Link href={`/print/${encodeURIComponent(userName)}`} className="btn">
+          印刷用レポートを表示
         </Link>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>案件名</th>
-            <th>タスク名</th>
-            <th>期限</th>
-            <th>状態</th>
-          </tr>
-        </thead>
-        <tbody>
-          {userTasks.map((task) => {
-            const project = data.projects.find((p) => p.id === task.project_id);
-            const isOverdue = task.status !== '完了' && task.due_date < today;
-            const statusText = isOverdue ? '遅延' : task.status;
-            const statusClass = statusClassMap[statusText] || '';
-
-            return (
-              <tr key={task.id}>
-                <td>{project ? project.name : '不明'}</td>
-                <td>{task.title}</td>
-                <td className={isOverdue ? 'overdue' : ''}>{task.due_date}</td>
-                <td>
-                  <span className={`status-label status-${statusClass}`}>
-                    {statusText}
-                  </span>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>案件名</th>
+              <th>タスク名</th>
+              <th>期限</th>
+              <th>状態</th>
+              <th className="no-print">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {userTasks.length === 0 ? <tr><td colSpan="5" style={{ textAlign: 'center' }}>タスクがありません</td></tr> : userTasks.map(task => {
+              const isOverdue = task.status !== '完了' && task.dueDate < today;
+              return (
+                <tr key={task.id} className={isOverdue ? 'overdue-row' : ''}>
+                  <td>{task.projectName}</td>
+                  <td>{task.taskName}</td>
+                  <td>
+                    {task.dueDate}
+                    {isOverdue && <span className="overdue-text">（遅延）</span>}
+                  </td>
+                  <td>
+                    <select 
+                      value={task.status} 
+                      onChange={(e) => updateTaskStatus(task.id, e.target.value)}
+                      className={`status-label status-${statusClassMap[task.status]}`}
+                      style={{ border: 'none', cursor: 'pointer' }}
+                    >
+                      <option value="未着手">未着手</option>
+                      <option value="進行中">進行中</option>
+                      <option value="完了">完了</option>
+                    </select>
+                  </td>
+                  <td className="no-print">
+                    <button onClick={() => deleteTask(task.id)} className="btn btn-danger btn-sm">削除</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

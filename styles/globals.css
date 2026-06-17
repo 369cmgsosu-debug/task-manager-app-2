@@ -12,56 +12,149 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   margin: 0;
-  padding: 20px;
+  padding: 10px;
 }
 
 h1, h2 {
   color: #111;
+  text-align: center;
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   background: #fff;
-  padding: 20px;
+  padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Dashboard Cards */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.user-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background: #fafafa;
+}
+
+.user-card h3 {
+  margin-top: 0;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 5px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-weight: bold;
+}
+
+/* Form Styles */
+.form-section {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.inline-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.inline-group input {
+  flex: 1;
+}
+
+/* Table Styles */
+.table-container {
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
 }
 
 th, td {
-  padding: 12px;
+  padding: 10px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
 }
 
 th {
-  background-color: #fafafa;
+  background-color: #f4f4f4;
+  white-space: nowrap;
 }
 
+/* Status Colors */
 .status-label {
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   font-size: 0.85em;
   font-weight: bold;
+  display: inline-block;
 }
 
-.status-not-started { background-color: #eee; }
-.status-in-progress { background-color: #e6f7ff; color: #1890ff; }
-.status-completed { background-color: #f6ffed; color: #52c41a; }
-.status-overdue { background-color: #fff1f0; color: #f5222d; border: 1px solid #ffa39e; }
+.status-not-started { background-color: #e0e0e0; color: #666; }
+.status-in-progress { background-color: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+.status-completed { background-color: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
 
-.overdue {
-  background-color: #fff1f0;
+.overdue-text {
+  color: #f5222d;
   font-weight: bold;
-  color: var(--error-color);
 }
 
+.overdue-row {
+  background-color: #fff1f0;
+}
+
+/* Buttons */
 .btn {
   display: inline-block;
   padding: 8px 16px;
@@ -72,14 +165,21 @@ th {
   cursor: pointer;
   border: none;
   font-size: 14px;
+  text-align: center;
 }
 
-.btn:hover {
-  opacity: 0.8;
+.btn:hover { opacity: 0.8; }
+
+.btn-danger { background-color: var(--error-color); }
+.btn-secondary { background-color: #8c8c8c; }
+.btn-sm { padding: 4px 8px; font-size: 12px; }
+
+.action-group {
+  display: flex;
+  gap: 5px;
 }
 
-.print-btn {
-  background-color: #555;
+.no-print-btn {
   margin-bottom: 20px;
 }
 
@@ -87,15 +187,6 @@ th {
   .no-print {
     display: none !important;
   }
-  body {
-    background-color: white;
-    padding: 0;
-  }
-  .container {
-    box-shadow: none;
-    max-width: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
+  body { padding: 0; background: white; }
+  .container { box-shadow: none; width: 100%; max-width: 100%; }
 }
